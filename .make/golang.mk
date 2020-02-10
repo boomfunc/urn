@@ -44,7 +44,7 @@ golang-fmt: $(GO) $(GO_SOURCE_FILES)
 .PHONY: golang-test
 golang-test: $(GO) $(GO_TEST_SOURCE_FILES)
 	#### Node( '$(NODE)' ).Call( '$@' )
-	$(GO) test -race -cover -run TestChallengeOneTimeMarker ./...
+	$(GO) test -race -cover ./...
 
 
 # Build and run section. Convert source code to executable and provide process.

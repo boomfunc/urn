@@ -1,19 +1,23 @@
+# For the ability to use resources under vpn there is host dns resolver required.
+# Example machine creation:
+#
+# docker-machine create <NAME> --virtualbox-host-dns-resolver --virtualbox-cpu-count 2
+
 version: "3.4"
 
 x-defaults:
 
-  logging: &logging
-    options:
-      max-size: 2m
-
   service: &service
     image: golang
     volumes:
+      - home-vol:/root
       - ssh-vol:/root/.ssh
-      - src-vol:/go/src/github.com/boomfunc/guard
-    working_dir: /go/src/github.com/boomfunc/guard
+      - src-vol:/go/src/github.com/boomfunc/urn
+    working_dir: /go/src/github.com/boomfunc/urn
     entrypoint: .make/make.sh
-    logging: *logging
+    logging:
+      options:
+        max-size: 2m
 
 services:
 
@@ -29,24 +33,16 @@ services:
     << : *service
     command: publish
 
+  # Сheck the list of nodes to which the targets described above would be applied.
   session:
     << : *service
     command: session
 
-  # TODO: old structure in containers below.
-  build:
-    << : *service
-    command: .scripts/build.sh
-
-  bench:
-    << : *service
-    command: .scripts/bench.sh
-
-  profile:
-    << : *service
-    command: .scripts/profile.sh
-
 volumes:
+  # Share all runtime generated across containers.
+  # Use container's user $(HOME) dir for sharing.
+  home-vol:
+
   # Allow to work with source code inside a container.
   src-vol:
     driver_opts:
