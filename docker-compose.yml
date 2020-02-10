@@ -1,0 +1,62 @@
+version: "3.4"
+
+x-defaults:
+
+  logging: &logging
+    options:
+      max-size: 2m
+
+  service: &service
+    image: golang
+    volumes:
+      - ssh-vol:/root/.ssh
+      - src-vol:/go/src/github.com/boomfunc/guard
+    working_dir: /go/src/github.com/boomfunc/guard
+    entrypoint: .make/make.sh
+    logging: *logging
+
+services:
+
+  lint:
+    << : *service
+    command: lint
+
+  test:
+    << : *service
+    command: test
+
+  publish:
+    << : *service
+    command: publish
+
+  session:
+    << : *service
+    command: session
+
+  # TODO: old structure in containers below.
+  build:
+    << : *service
+    command: .scripts/build.sh
+
+  bench:
+    << : *service
+    command: .scripts/bench.sh
+
+  profile:
+    << : *service
+    command: .scripts/profile.sh
+
+volumes:
+  # Allow to work with source code inside a container.
+  src-vol:
+    driver_opts:
+      type: none
+      device: ${PWD}
+      o: bind
+
+  # Allow us to use SSH authentication inside a container.
+  ssh-vol:
+    driver_opts:
+      type: none
+      device: ${HOME}/.ssh
+      o: bind
