@@ -46,9 +46,7 @@ func New(
 	nss string,
 ) (*URN, error) {
 	bNID := bytes.TrimSpace([]byte(nid))
-
-	err := validateNID(bNID)
-	if err != nil {
+	if err := validateNID(bNID); err != nil {
 		return nil, fmt.Errorf(
 			"can't create URN, reason: %s",
 			err.Error(),
@@ -56,9 +54,7 @@ func New(
 	}
 
 	bNSS := bytes.TrimSpace([]byte(nss))
-
-	err = validateNSS(bNSS)
-	if err != nil {
+	if err := validateNSS(bNSS); err != nil {
 		return nil, fmt.Errorf(
 			"can't create URN, reason: %s",
 			err.Error(),
@@ -78,9 +74,7 @@ func Parse(rawURN string) (*URN, error) {
 }
 
 func MustParse(rawURN string) *URN {
-	u, err := parseRawURN(
-		bytes.TrimSpace([]byte(rawURN)),
-	)
+	u, err := Parse(rawURN)
 
 	if err != nil {
 		panic(err)
@@ -131,22 +125,24 @@ func parseRawURN(rawURN []byte) (*URN, error) {
 
 // String - returns string representation of a URN
 func (urn *URN) String() string {
-	return string(
-		urn.constructURN(),
-	)
+	return string(urn.Bytes())
 }
 
 // MarshalJSON - implements JSON Marshaller interface.
 // Returns a valid JSON string
 func (urn *URN) MarshalJSON() ([]byte, error) {
-	return append(
-		[]byte{34}, append(urn.constructURN(), []byte{34}...)...,
+	return bytes.Join(
+		[][]byte{
+			[]byte{34}, // "
+			urn.Bytes(),
+			[]byte{34}, // "
+		}, nil,
 	), nil
 }
 
-// constructURN - constructs an URN in valid representation
+// Bytes - constructs an URN in valid bytes representation.
 // e.g. 'urn:<nid>:<nss>'
-func (urn *URN) constructURN() []byte {
+func (urn *URN) Bytes() []byte {
 	return bytes.Join(
 		[][]byte{
 			urnPrefix,
