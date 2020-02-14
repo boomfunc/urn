@@ -28,6 +28,7 @@ tfplan
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+coverage.html
 
 # OS
 .DS_Store
